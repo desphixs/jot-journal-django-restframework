@@ -28,3 +28,28 @@ class TagList(APIView):
         # 3. We return the translated JSON data inside a Response object.
         # This sends the data back to the user with a "200 OK" status by default.
         return Response(serializer.data)
+
+    # The 'post' method handles HTTP POST requests.
+    # This is used for "Create" operations—sending data to the server to be saved.
+    def post(self, request):
+        # 1. We pass the incoming data (request.data) to our Serializer.
+        # Analogy: This is like handing a completed form to a clerk.
+        serializer = TagSerializer(data=request.data)
+        
+        # 2. We check if the data follows the rules (like max_length=50).
+        # Analogy: The clerk checking if you filled out all the required 
+        # boxes on the form correctly.
+        if serializer.is_valid():
+            # 3. If valid, we save the new 'Tag' to the database.
+            # Analogy: The clerk stamping the form "Approved" and filing it.
+            serializer.save()
+            
+            # 4. We return the newly created tag data with a "201 Created" status.
+            # 201 is the standard "Success! New thing created" code.
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        # 5. If the data is bad (invalid), we return the errors and a "400 Bad Request" status.
+        # 400 is the standard code for "You made a mistake in your request".
+        # Analogy: The clerk handing the form back to you with red circles 
+        # around the mistakes you made.
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
