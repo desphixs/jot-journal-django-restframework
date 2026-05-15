@@ -71,3 +71,35 @@ class EntryList(APIView):
         
         # 3. We return the final JSON.
         return Response(serializer.data)
+
+    # The 'post' method handles creating new journal entries.
+    # This is slightly more complex because we have to link tags (Many-to-Many)!
+    def post(self, request):
+        # 1. We pass the data to our translator.
+        # Analogy: Handing the filled-out "New Entry" form to the clerk.
+        serializer = EntrySerializer(data=request.data)
+        
+        # 2. Check if the title and body are valid.
+        if serializer.is_valid():
+            # 3. If valid, we save the entry first.
+            # We save it to a variable 'entry' so we can link tags to it in the next step.
+            # Analogy: The clerk files the new notebook page first...
+            entry = serializer.save()
+            
+            # 4. We grab the 'tags' list from the raw request data.
+            # The user should send a list of IDs, like: "tags": [1, 3]
+            tag_ids = request.data.get('tags')
+            
+            # 5. If the user actually provided some tags, we link them.
+            if tag_ids:
+                # '.set()' is a special Django method for Many-to-Many fields.
+                # It clears any old tags and replaces them with this new list of IDs.
+                # Analogy: ...and then the clerk sticks the physical labels 
+                # onto the corner of that page.
+                entry.tags.set(tag_ids)
+            
+            # 6. We return the final entry data (including the new tags) with 201 status.
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        # 7. If data is bad, return errors.
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
