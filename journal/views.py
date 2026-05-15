@@ -158,3 +158,21 @@ class EntryDetail(APIView):
             
         # 7. Return errors if data was bad.
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # The 'delete' method handles removing a journal entry forever.
+    def delete(self, request, pk):
+        # 1. We look up the entry first, just like we did in 'get' and 'put'.
+        try:
+            entry = Entry.objects.get(pk=pk)
+        except Entry.DoesNotExist:
+            return Response({"error": "Entry not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        # 2. We call the '.delete()' method on the object.
+        # Analogy: This is like the librarian taking the notebook page 
+        # and putting it through a paper shredder.
+        entry.delete()
+        
+        # 3. We return a '204 No Content' status.
+        # This means "It worked, but because the item is gone, there is 
+        # nothing left for me to show you."
+        return Response(status=status.HTTP_204_NO_CONTENT)
