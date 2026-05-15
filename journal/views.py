@@ -128,3 +128,33 @@ class EntryDetail(APIView):
         
         # 4. Return the JSON.
         return Response(serializer.data)
+
+    # The 'put' method handles updating (editing) an existing journal entry.
+    def put(self, request, pk):
+        # 1. We look up the entry first, just like we did in the 'get' method.
+        try:
+            entry = Entry.objects.get(pk=pk)
+        except Entry.DoesNotExist:
+            return Response({"error": "Entry not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        # 2. We pass the EXISTING entry and the NEW data to the serializer.
+        # Analogy: This is like handing the clerk the original notebook page 
+        # along with a list of corrections you want to make.
+        serializer = EntrySerializer(entry, data=request.data)
+        
+        # 3. Validate the new data.
+        if serializer.is_valid():
+            # 4. Save the changes.
+            serializer.save()
+            
+            # 5. Handle the Many-to-Many tags update.
+            tag_ids = request.data.get('tags')
+            if tag_ids:
+                # This replaces the old labels with the new ones.
+                entry.tags.set(tag_ids)
+                
+            # 6. Return the updated data.
+            return Response(serializer.data)
+            
+        # 7. Return errors if data was bad.
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
