@@ -103,3 +103,28 @@ class EntryList(APIView):
         
         # 7. If data is bad, return errors.
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# The 'EntryDetail' view handles actions on a single, specific journal entry.
+# We use the 'pk' (Primary Key) from the URL to figure out which entry 
+# the user is talking about.
+# Analogy: This is like a librarian going into the back room to find 
+# a specific book by its unique ID number.
+class EntryDetail(APIView):
+    # The 'get' method for a single entry.
+    def get(self, request, pk):
+        # 1. We try to find the entry in the database by its unique ID (pk).
+        try:
+            # Analogy: The librarian searching the shelf for that specific ID.
+            entry = Entry.objects.get(pk=pk)
+        except Entry.DoesNotExist:
+            # 2. If it's not there, we return a "404 Not Found" error.
+            # Analogy: Telling the user "Sorry, we don't have that book in our library."
+            return Response({"error": "Entry not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        # 3. If found, we translate it using our serializer.
+        # Note: We don't use 'many=True' here because we are only 
+        # translating ONE single object.
+        serializer = EntrySerializer(entry)
+        
+        # 4. Return the JSON.
+        return Response(serializer.data)
