@@ -1,6 +1,6 @@
 from django.urls import path
 # We import our views from the local views.py file.
-from .views import TagList
+from .views import TagList, EntryList
 
 # In Django, every app can have its own private URL file.
 # Analogy: This is like a sub-menu for a specific section of a store.
@@ -12,4 +12,8 @@ urlpatterns = [
     # Note: We don't include 'api/' here because it will be added in 
     # the main project URL file.
     path('tags/', TagList.as_view(), name='tag-list'),
+
+    # We map 'entries/' to our EntryList view.
+    # When someone goes to 'api/entries/', they will see all journal posts.
+    path('entries/', EntryList.as_view(), name='entry-list'),
 ]

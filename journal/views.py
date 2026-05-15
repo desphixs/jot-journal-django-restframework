@@ -53,3 +53,21 @@ class TagList(APIView):
         # Analogy: The clerk handing the form back to you with red circles 
         # around the mistakes you made.
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# The 'EntryList' view handles our journal entries.
+# Since we already have the 'EntrySerializer' set up with nested tags, 
+# this view will automatically show the full details of every tag!
+class EntryList(APIView):
+    # The 'get' method for our entries.
+    def get(self, request):
+        # 1. We fetch all entries from the database.
+        # Analogy: Opening our notebook and looking at every page we've written.
+        entries = Entry.objects.all()
+        
+        # 2. We pass the entries to the 'EntrySerializer'.
+        # This will automatically call the 'TagSerializer' for each tag 
+        # inside each entry because of how we built the serializer!
+        serializer = EntrySerializer(entries, many=True)
+        
+        # 3. We return the final JSON.
+        return Response(serializer.data)
